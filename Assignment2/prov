@@ -1,0 +1,80 @@
+import Sofa
+import Sofa.Core
+import os
+from stlib3.physics.constraints import FixedBox
+from stlib3.physics.deformable import ElasticMaterialObject
+import numpy as np
+
+
+def createScene(rootNode):
+# rootNode properties:
+    rootNode.addObject('RequiredPlugin', name='ModelOrderReduction', pluginName='ModelOrderReduction')
+    rootNode.addObject('RequiredPlugin', name='SofaPython3', pluginName='SofaPython3')
+    rootNode.addObject('VisualStyle', displayFlags='showCollision showVisualModels showForceFields showInteractionForceFields hideCollisionModels hideBoundingCollisionModels hideWireframe')
+    rootNode.findData('dt').value=0.01
+    #gravity set to zero for making membrane stable
+    rootNode.findData('gravity').value=[0, 0, 0]
+    rootNode.addObject('RequiredPlugin', name='Sofa.Component.AnimationLoop') # Needed to use components [FreeMotionAnimationLoop]  
+    rootNode.addObject('RequiredPlugin', name='Sofa.Component.IO.Mesh') # Needed to use components [MeshOBJLoader]  
+    rootNode.addObject('RequiredPlugin', name='Sofa.Component.LinearSolver.Direct') # Needed to use components [SparseLDLSolver]  
+    rootNode.addObject('RequiredPlugin', name='Sofa.Component.Mapping.Linear') # Needed to use components [BarycentricMapping]  
+    rootNode.addObject('RequiredPlugin', name='Sofa.Component.Mass') # Needed to use components [UniformMass]  
+    rootNode.addObject('RequiredPlugin', name='Sofa.Component.ODESolver.Backward') # Needed to use components [EulerImplicitSolver]  
+    rootNode.addObject('RequiredPlugin', name='Sofa.Component.StateContainer') # Needed to use components [MechanicalObject]  
+    rootNode.addObject('RequiredPlugin', name='Sofa.Component.Topology.Container.Dynamic') # Needed to use components [TetrahedronSetTopologyContainer]  
+    rootNode.addObject('RequiredPlugin', name='Sofa.Component.Visual') # Needed to use components [VisualStyle]  
+    rootNode.addObject('RequiredPlugin', name='Sofa.GL.Component.Rendering3D') # Needed to use components [OglModel,OglSceneFrame]  
+    rootNode.addObject('RequiredPlugin', name='Sofa.Component.Constraint.Lagrangian.Solver')
+    rootNode.addObject('RequiredPlugin', name='Sofa.Component.Constraint.Lagrangian.Correction') # Needed to use components [GenericConstraintCorrection]  
+    rootNode.addObject('RequiredPlugin', name='Sofa.Component.Engine.Select') # Needed to use components [BoxROI]  
+    rootNode.addObject('RequiredPlugin', name='Sofa.Component.MechanicalLoad') # Needed to use components [ConstantForceField]  
+    rootNode.addObject('RequiredPlugin', name='Sofa.Component.SolidMechanics.Spring') # Needed to use components [RestShapeSpringsForceField]  
+    rootNode.addObject('RequiredPlugin', name='Sofa.Component.SolidMechanics.FEM.Elastic') # Needed to use components [TetrahedronFEMForceField]  
+    rootNode.addObject("FreeMotionAnimationLoop")
+    rootNode.addObject('OglSceneFrame', style="Arrows", alignment="TopRight")
+    
+ # Membrane:  
+ 
+  
+    membrane = rootNode.addChild('membrane')
+    membrane.addObject('EulerImplicitSolver', rayleighStiffness=1, rayleighMass='0.')
+    membrane.addObject('SparseLDLSolver',template="CompressedRowSparseMatrixMat3x3d")
+    #mesh path vtu
+    # We tried using the given vtu file, then we generated a new vtu via meshgenerator.py
+    # membrane.addObject('MeshVTKLoader', name='loader', filename='Triangular_membrane.vtu', scale='0.1')
+    membrane.addObject('MeshVTKLoader', name='loader', filename='Triangular_Membrane v0.vtu', scale='0.1')
+    membrane.addObject('TetrahedronSetTopologyContainer', src="@loader")
+    membrane.addObject('MechanicalObject', template = 'Vec3d', name ='dofs')
+    #set mass
+    membrane.addObject('UniformMass', totalMass=0.32)
+    membrane.addObject('GenericConstraintSolver')
+    membrane.addObject('GenericConstraintCorrection', solverName='preconditioner')
+    # these are the fixed points
+    membrane.addObject('BoxROI', name='ROI1', box='-2.5 -2.5 -1 2.5 2.5 4', drawBoxes='true')
+    membrane.addObject('BoxROI', name='ROI2', box='97.5 -2.5 -1 102.5 2.5 4', drawBoxes='true')
+    membrane.addObject('BoxROI', name='ROI3', box='47.5 82.5 -1 52.5 87.5 4', drawBoxes='true')
+    # these are the points subject to forces
+    membrane.addObject('BoxROI', name='ROI4', box='47.5 -2.5 -1 52.5 2.5 4', drawBoxes='true')
+    membrane.addObject('BoxROI', name='ROI5', box='22.5 40 -1 27.5 45 4', drawBoxes='true')
+    membrane.addObject('BoxROI', name='ROI6', box='72.5 40 -1 77.5 45 4', drawBoxes='true')
+    membrane.addObject('TetrahedronFEMForceField', poissonRatio="0.2", youngModulus="18000")
+    FixedBox(membrane, doVisualization=True, atPositions=[-2.5, -2.5, -1, 2.5, 2.5, 4])
+    FixedBox(membrane, doVisualization=True, atPositions=[97.5, -2.5, -1, 102.5, 2.5, 4])
+    FixedBox(membrane, doVisualization=True, atPositions=[47.5, 82.5, -1, 52.5, 87.5, 4])
+     
+ #visual part of membrane:
+    visual_membrane = membrane.addChild('visual_membrane')
+    visual_membrane.addObject( 'MeshOBJLoader', name= 'loader', filename='Triangular_Membrane v0.obj', scale='0.1')
+    visual_membrane.addObject('OglModel',src='@loader')
+    visual_membrane.addObject('BarycentricMapping')
+    
+      
+ #force application: 
+ 
+    membrane.addObject('ConstantForceField', indices='@ROI4.indices', force=[0, -1500, 0])
+    membrane.addObject('ConstantForceField', indices='@ROI5.indices', force=[-15000, 0, 0])    
+    membrane.addObject('ConstantForceField', indices='@ROI6.indices', force=[15000, 0, 0])    
+    return rootNode
+
+  
+

@@ -1,0 +1,41 @@
+# -*- coding: utf-8 -*-
+
+from stlib3.scene import MainHeader, ContactHeader
+from stlib3.physics.rigid import Cube
+from stlib3.physics.rigid import Sphere
+import numpy as np
+
+
+def createScene(rootNode):
+
+    pluginList = ["Sofa.Component.AnimationLoop",
+                  "Sofa.Component.Collision.Detection.Algorithm",
+                  "Sofa.Component.Collision.Detection.Intersection",
+                  "Sofa.Component.Collision.Geometry",
+                  "Sofa.Component.Collision.Response.Contact",
+                  "Sofa.Component.Constraint.Lagrangian.Solver",
+                  "Sofa.Component.IO.Mesh",
+                  "Sofa.Component.LinearSolver.Iterative",
+                  "Sofa.Component.Mass",
+                  "Sofa.Component.MechanicalLoad",	
+                  "Sofa.Component.ODESolver.Backward",
+                  "Sofa.Component.StateContainer",
+                  "Sofa.Component.Topology.Container.Constant",
+                  "Sofa.Component.Visual",
+                  "Sofa.GL.Component.Rendering3D","Sofa.Component.Mapping.NonLinear", 'Sofa.Component.Constraint.Lagrangian.Correction']
+
+    MainHeader(rootNode, gravity=[0.0, -9.81, 0.0], plugins=pluginList)
+    ContactHeader(rootNode, alarmDistance=1, contactDistance=1)
+    rootNode.addObject("FreeMotionAnimationLoop")
+    rootNode.addObject('GenericConstraintSolver',maxIterations=1000,tolerance=0.001)
+
+    cube1 = Cube(rootNode, translation=[-50.0, 0.0, 0.0], uniformScale=20.0, color=[0,0,1,1])
+    cube1.addObject('UncoupledConstraintCorrection')
+    cube1.addObject('ConstantForceField', totalForce=[50, 0, 0, 0, 0, 0])
+    
+
+    cube2 = Cube(rootNode, translation=[50.0, 0.0, 0.0], uniformScale=20.0, color=[1,0,0,1]) 
+    cube2.addObject('UncoupledConstraintCorrection')
+    cube2.addObject('ConstantForceField', totalForce=[-50, 0, 0, 0, 0, 0])
+
+    return rootNode
