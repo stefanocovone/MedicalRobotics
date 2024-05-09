@@ -7,7 +7,6 @@ import os
 
 from stlib3.scene import Scene
 # A prefab that implements an ElasticMaterialObject
- #from splib.objectmodel import SofaPrefab, SofaObject
 from stlib3.physics.deformable import ElasticMaterialObject
 from stlib3.visuals import VisualModel
 
@@ -21,24 +20,21 @@ def createScene(rootNode):
     rootNode.addObject("FreeMotionAnimationLoop")
     rootNode.addObject("GenericConstraintSolver", maxIterations=1000, tolerance=0.001)
     
-    #mesh = rootNode.addObject('MeshVTKLoader', name="loader", filename='finger.vtk')
-
-    #finger = ElasticMaterialObject(rootNode,name="finger",
-    #                               volumeMeshFileName=mesh,
-    #                               poissonRatio=0.45,
-    #                               youngModulus=600,
-    #                               totalMass=0.05)
-
+    finger = ElasticMaterialObject(rootNode,name="finger",
+                                   volumeMeshFileName="finger.vtk",
+                                   poissonRatio=0.45,
+                                   youngModulus=600,
+                                   totalMass=0.05)
+    rootNode.addChild(finger)
 
     #finger = rootNode.addChild('finger')
-    rootNode.addObject('EulerImplicitSolver', rayleighStiffness = 0.0, rayleighMass = 0.0)
-    rootNode.addObject('SparseLDLSolver',template="CompressedRowSparseMatrixMat3x3d")
+    #finger.addObject('EulerImplicitSolver', rayleighStiffness = 0.0, rayleighMass = 0.0)
+    #finger.addObject('SparseLDLSolver',template="CompressedRowSparseMatrixMat3x3d")
     #finger.addObject('MeshVTKLoader', name="loader", filename='finger.vtk')
-    rootNode.addObject('TetrahedronSetTopologyContainer', src="@loader")
+    #finger.addObject('TetrahedronSetTopologyContainer', src="@loader")
     #finger.addObject('MechanicalObject')
     #finger.addObject('UniformMass', totalMass=0.05)
     #finger.addObject('TetrahedronFEMForceField', poissonRatio="0.45", youngModulus="600")
-    ##finger.addObject('TetrahedronFEMForceField')
     #finger.addObject('GenericConstraintCorrection')
     
     # To facilitate the selection of DoFs, SOFA has a concept called ROI (Region of Interest).
