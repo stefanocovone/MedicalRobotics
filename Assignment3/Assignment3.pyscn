@@ -22,7 +22,7 @@ def createScene(rootNode):
 
     sphere=Sphere(rootNode, translation=[0.0,0.0,0.0],uniformScale=3.0, color=[0,0,1,1])
     #sphere.addObject('UncoupledConstraintCorrection')
-    sphere.addObject('GenericConstraintCorrection')
+    #sphere.addObject('GenericConstraintCorrection')
 
     ##########################################
     # Cable                                  #
