@@ -11,6 +11,7 @@ from stlib3.physics.deformable import ElasticMaterialObject
 from stlib3.visuals import VisualModel
 from stlib3.physics.constraints import FixedBox
 from softrobots.actuators import PullingCable
+from splib3.loaders import loadPointListFromFile
 import Sofa.constants.Key as Key
 
 class Animation(Sofa.Core.Controller):
@@ -87,22 +88,7 @@ def createScene(rootNode):
                          "PullingCable",
                          pullPointLocation=[
                         [0.0, 12.5, 2.5]],
-                        cableGeometry=[[-17.5, 12.5, 2.5],
-                        [-32.5, 12.5, 2.5],
-                        [-47.5, 12.5, 2.5],
-                        [-62.5, 12.5, 2.5],
-                        [-77.5, 12.5, 2.5],
-
-                        [-83.5, 12.5, 4.5],
-                        [-85.5, 12.5, 6.5],
-                        [-85.5, 12.5, 8.5],
-                        [-83.5, 12.5, 10.5],
-
-                        [-77.5, 12.5, 12.5],
-                        [-62.5, 12.5, 12.5],
-                        [-47.5, 12.5, 12.5],
-                        [-32.5, 12.5, 12.5],
-                        [-17.5, 12.5, 12.5]])
+                        cableGeometry=loadPointListFromFile("cable.json"))
 
     # This adds a BarycentricMapping. A BarycentricMapping is a key element as it will add a bidirectional link
     # between the cable's DoFs and the finger's one's so that movements of the cable's DoFs will be mapped
@@ -114,22 +100,7 @@ def createScene(rootNode):
                          "PullingCable",
                          pullPointLocation=[
                         [0.0, 12.5, 12.5]],
-                        cableGeometry=[[-17.5, 12.5, 12.5],
-                        [-32.5, 12.5, 12.5],
-                        [-47.5, 12.5, 12.5],
-                        [-62.5, 12.5, 12.5],
-                        [-77.5, 12.5, 12.5],
-
-                        [-83.5, 12.5, 10.5],
-                        [-85.5, 12.5, 8.5],
-                        [-85.5, 12.5, 6.5],
-                        [-83.5, 12.5, 4.5],
-
-                        [-77.5, 12.5, 2.5],
-                        [-62.5, 12.5, 2.5],
-                        [-47.5, 12.5, 2.5],
-                        [-32.5, 12.5, 2.5],
-                        [-17.5, 12.5, 2.5]])
+                        cableGeometry=loadPointListFromFile("cable2.json"))
     finger.addObject(Animation2(cable2))
 
 
