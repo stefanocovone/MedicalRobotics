@@ -1,0 +1,108 @@
+# -*- coding: utf-8 -*-
+
+import Sofa
+import os
+import Sofa.Core
+
+
+from stlib3.scene import Scene
+# A prefab that implements an ElasticMaterialObject
+from stlib3.physics.deformable import ElasticMaterialObject
+from stlib3.visuals import VisualModel
+from stlib3.physics.constraints import FixedBox
+from softrobots.actuators import PullingCable
+from splib3.loaders import loadPointListFromFile
+import Sofa.constants.Key as Key
+
+class Animation(Sofa.Core.Controller):
+
+    def __init__(self, *args, **kwargs):
+        Sofa.Core.Controller.__init__(self, *args, **kwargs)
+        self.cable = args[0]
+        self.name = "Animation1"
+
+        return
+
+    def onKeypressedEvent(self, event):
+        key = event['key']
+        displacement = self.cable.CableConstraint.value[0]
+        if ord(key) == 18:  # left
+           displacement += 1.
+
+        if ord(key) == 20:  # right
+            displacement -= 1.
+            if displacement < 0:
+               displacement = 0
+        self.cable.CableConstraint.value = [displacement]
+
+class Animation2(Sofa.Core.Controller):
+
+    def __init__(self, *args, **kwargs):
+        Sofa.Core.Controller.__init__(self, *args, **kwargs)
+        self.cable = args[0]
+        self.name = "Animation2"
+
+        return
+
+    def onKeypressedEvent(self, event):
+        key = event['key']
+        displacement = self.cable.CableConstraint.value[0]
+        if ord(key) == 21:  # down
+           displacement += 1.
+
+        if ord(key) == 19:  # up
+            displacement -= 1.
+            if displacement < 0:
+               displacement = 0
+        self.cable.CableConstraint.value = [displacement]
+
+def createScene(rootNode):
+    rootNode.addObject("RequiredPlugin",
+                       pluginName=["SoftRobots", 'SofaConstraint', 'SofaEngine', 'SofaLoader', 'SofaDeformable', 'ModelOrderReduction'])
+    scene = Scene(rootNode, gravity=[0.0, -9810.0, 0.0], dt=0.01)
+    scene.VisualStyle.displayFlags='showBehavior'
+
+    rootNode.addObject("FreeMotionAnimationLoop")
+    rootNode.addObject("GenericConstraintSolver", maxIterations=1000, tolerance=0.001)
+    
+    finger = ElasticMaterialObject(rootNode,name="finger",
+                                   volumeMeshFileName="finger.vtk",
+                                   poissonRatio=0.45,
+                                   youngModulus=600,
+                                   totalMass=0.05)
+    rootNode.addChild(finger)
+
+    finger.addObject('BoxROI', name='ROI1', box=[-15, 0, 0, 5, 10, 15], drawBoxes=True)
+    # Or "SphereROI"...
+    # finger.addObject('SphereROI', name='ROI', centers='0 0 0', radii='5')
+
+    # RestShapeSpringsForceField is one way in Sofa to implement fixed point constraint.
+    # Here the constraints are applied to the DoFs selected by the previously defined BoxROI
+    finger.addObject('RestShapeSpringsForceField', points='@ROI1.indices', stiffness=1e12)
+
+    ##########################################
+    # Cable                                  #
+    ##########################################
+    
+    cable = PullingCable(finger,
+                         "PullingCable",
+                         pullPointLocation=[
+                        [0.0, 12.5, 2.5]],
+                        cableGeometry=loadPointListFromFile("cable.json"))
+
+    # This adds a BarycentricMapping. A BarycentricMapping is a key element as it will add a bidirectional link
+    # between the cable's DoFs and the finger's one's so that movements of the cable's DoFs will be mapped
+    # to the finger and vice-versa;
+    cable.addObject('BarycentricMapping')
+
+    finger.addObject(Animation(cable))
+    cable2 = PullingCable(finger,
+                         "PullingCable",
+                         pullPointLocation=[
+                        [0.0, 12.5, 12.5]],
+                        cableGeometry=loadPointListFromFile("cable2.json"))
+    finger.addObject(Animation2(cable2))
+
+
+
+    return rootNode

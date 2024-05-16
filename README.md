@@ -1,13 +1,11 @@
 # MedicalRobotics
- Course Assignment for the Medical Robotics Course - prof. Fanny Ficuciello - 2023/2024
 
- ## Assigment 1
-Test the SOFA plugins - generate a mesh file
-## Assigment 2
-Bouncing balls
-## Assigment 3
-Elastic Triangular Membrane
-## Assigment 4
-Finger simulation
-## Assigment 5
-Cables and balls
+## Description
+ Course Assignments for the Medical Robotics Course
+ 
+ prof. Fanny Ficuciello - a.y. 2023/2024
+
+## Requirements
+ To run the code a compiled SOFA installation is required. Please refer to:
+
+https://www.sofa-framework.org/community/doc/getting-started/build/linux/
